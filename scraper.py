@@ -1,17 +1,24 @@
 from bs4 import BeautifulSoup
 import requests
 
+url = "https://www.newegg.com/global/uk-en/gigabyte-geforce-rtx-4080-gv-n4080eagle-oc-16gd/p/N82E16814932562"
 
-with open("index.html") as fp:
-    soup = BeautifulSoup(fp, 'html.parser')
+result = requests.get(url)
+print(result.text)
 
 
-soup = BeautifulSoup('<b class="boldest">Extremely bold</b>', 'html.parser')
-tag = soup.b
-type(tag)
+doc = BeautifulSoup(result.text, "html.parser")
 
-print(tag)
+print(doc.prettify())
 
-#This will change the tag <b> to <blockquote>
-tag.name = "blockquote"
-print(tag)
+
+prices = doc.find_all(string="£")
+print(prices)
+
+parent = prices[0].parent 
+print(parent)
+strong = parent.find("strong")
+print(strong.string)
+
+
+
