@@ -1,6 +1,5 @@
-import csv
-from getpass import getpass
 import time
+import sqlite3
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -10,8 +9,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
-
-import sqlite3
 
 # Connect to the database (or create it if it doesn't exist)
 conn = sqlite3.connect('tweets.db')
@@ -45,7 +42,7 @@ def tweet_data():
 
     #Finds password field and inputs password then returns
     password = wait.until(EC.presence_of_element_located((By.NAME, 'password')))
-    password.send_keys('')
+    password.send_keys('JoshProject265!?')
     password.send_keys(Keys.RETURN) #Presses enter key - logins into account
             
     #Finds search box on twitter & inputs texts, then returns
@@ -54,8 +51,7 @@ def tweet_data():
     search_method.send_keys(Keys.RETURN)
 
 
-    time.sleep(2)
-    latest = driver.find_element(By.LINK_TEXT, 'Latest')
+    latest = wait.until(EC.element_to_be_clickable((By.LINK_TEXT, 'Latest')))
 
     latest.click()
 
@@ -120,12 +116,13 @@ def tweet_data():
     # # Return the collected tweets
     # return list(collected_tweets)
 
-# Call the function
-tweets = tweet_data()
+# Call the function & if there is an error this ensures the databases closes correctly
+try:
+    tweets = tweet_data()
+finally:
+    cursor.close()
+    conn.close()
 
-# input("Press enter to close the browser")
-
+input("Press enter to close the browser") #NOT IN USE CURRENTLY
 # Close the WebDriver
 driver.quit()
-cursor.close()
-conn.close()
