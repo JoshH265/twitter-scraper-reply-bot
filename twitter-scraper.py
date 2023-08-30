@@ -12,6 +12,23 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import StaleElementReferenceException
 
+import sqlite3
+
+# Connect to the database (or create it if it doesn't exist)
+conn = sqlite3.connect('tweets.db')
+cursor = conn.cursor()
+
+# Create the table (if it doesn't exist)
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS tweets (
+        id INTEGER PRIMARY KEY,
+        handle TEXT,
+        content TEXT
+        url TEXT
+    )
+''')
+conn.commit()
+
 
 
 
@@ -22,8 +39,6 @@ driver = webdriver.Chrome()
 driver.get("https://twitter.com/login")
 
 def tweet_data():
-    
-
 
     wait = WebDriverWait(driver, 10)  # Creates a maximum wait time of 10 seconds for each field
 
@@ -42,9 +57,13 @@ def tweet_data():
     search_method.send_keys('#BITCOIN')
     search_method.send_keys(Keys.RETURN)
 
+
+    time.sleep(2)
     latest = driver.find_element(By.LINK_TEXT, 'Latest')
 
     latest.click()
+
+
     
     # Set to keep track of collected tweets' content and handle
     collected_tweets = set()
@@ -60,6 +79,16 @@ def tweet_data():
             try:
                 tweet_text = tweet.find_element(By.XPATH, './/div[@lang]').text
                 twitter_handle = tweet.find_element(By.XPATH, './/span[contains(text(), "@")]').text
+                        
+                # Extract tweet_id from the href attribute of the a element containing the tweet text
+                a = tweet.find_element(By.XPATH, './/a[contains(@href, "/status/")]')
+                href = a.get_attribute('href')
+                tweet_id = href.split('/')[-1]
+        
+                # Construct the tweet URL
+                tweet_url = f'https://twitter.com/{twitter_handle}/status/{tweet_id}'
+
+
             except StaleElementReferenceException:
                 continue
             
@@ -68,9 +97,14 @@ def tweet_data():
             if tweet_data not in collected_tweets:
                 print("Handle:", twitter_handle)
                 print("Content:", tweet_text)
+                print("URL:", tweet_url)
                 print("--------------------")
                 # Add the tweet data to the collected tweets set
                 collected_tweets.add(tweet_data)
+
+                # Insert the tweet into the database
+                cursor.execute('INSERT INTO tweets (handle, content, url) VALUES (?, ?, ?)', (twitter_handle, tweet_text, tweet_url))
+                conn.commit()
                 
                 new_tweets = True
         
@@ -79,6 +113,9 @@ def tweet_data():
         
         # Wait for some time to allow tweets to load
         time.sleep(10)
+        driver.refresh()
+        time.sleep(5)
+
         
         # If there were no new tweets in the current batch, stop
         if not new_tweets:
@@ -99,3 +136,5 @@ input("Press enter to close the browser")
 
 # Close the WebDriver
 driver.quit()
+cursor.close()
+conn.close()
