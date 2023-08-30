@@ -3,14 +3,13 @@ from getpass import getpass
 import time
 
 from selenium import webdriver
-from selenium.webdriver import Chrome
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 
-
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
+
 
 import sqlite3
 
@@ -23,14 +22,11 @@ cursor.execute('''
     CREATE TABLE IF NOT EXISTS tweets (
         id INTEGER PRIMARY KEY,
         handle TEXT,
-        content TEXT
+        content TEXT,
         url TEXT
     )
 ''')
 conn.commit()
-
-
-
 
 # Creates an instance of Chrome
 driver = webdriver.Chrome()
@@ -49,12 +45,12 @@ def tweet_data():
 
     #Finds password field and inputs password then returns
     password = wait.until(EC.presence_of_element_located((By.NAME, 'password')))
-    password.send_keys('JoshProject265!?')
+    password.send_keys('')
     password.send_keys(Keys.RETURN) #Presses enter key - logins into account
             
     #Finds search box on twitter & inputs texts, then returns
     search_method = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '[data-testid="SearchBox_Search_Input"]')))
-    search_method.send_keys('#BITCOIN')
+    search_method.send_keys('crypto')
     search_method.send_keys(Keys.RETURN)
 
 
@@ -63,15 +59,17 @@ def tweet_data():
 
     latest.click()
 
-
-    
     # Set to keep track of collected tweets' content and handle
     collected_tweets = set()
     
     # Scroll down and collect tweets until there are no more new tweets
     while True:
-        tweets = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, '[data-testid="tweet"]')))
-        
+        try: #waits for tweets to load
+            tweets = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, '[data-testid="tweet"]')))
+        except TimeoutException:
+            print("Tweet error")
+            tweets = []
+
         new_tweets = False
         
         for tweet in tweets:
@@ -89,7 +87,7 @@ def tweet_data():
                 tweet_url = f'https://twitter.com/{twitter_handle}/status/{tweet_id}'
 
 
-            except StaleElementReferenceException:
+            except NoSuchElementException:
                 continue
             
             # If the tweet is not already collected, process it
@@ -112,27 +110,20 @@ def tweet_data():
         driver.execute_script('window.scrollTo(0, document.body.scrollHeight)')
         
         # Wait for some time to allow tweets to load
-        time.sleep(10)
-        driver.refresh()
         time.sleep(5)
 
         
         # If there were no new tweets in the current batch, stop
         if not new_tweets:
-            break
-    
-    # Return the collected tweets
-    return list(collected_tweets)
+            driver.refresh()
+
+    # # Return the collected tweets
+    # return list(collected_tweets)
 
 # Call the function
 tweets = tweet_data()
 
-
-
-
-
-
-input("Press enter to close the browser")
+# input("Press enter to close the browser")
 
 # Close the WebDriver
 driver.quit()
