@@ -37,23 +37,24 @@ def tweet_data():
 
     #Finds username field and inputs username then returns
     username = wait.until(EC.presence_of_element_located((By.NAME, 'text')))
-    username.send_keys('JoshScraper265')
+    username.send_keys('')
+
     username.send_keys(Keys.RETURN) #Presses enter key
 
     #Finds password field and inputs password then returns
     password = wait.until(EC.presence_of_element_located((By.NAME, 'password')))
-    password.send_keys('JoshProject265!?')
+    password.send_keys('')
     password.send_keys(Keys.RETURN) #Presses enter key - logins into account
             
     #Finds search box on twitter & inputs texts, then returns
     search_method = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '[data-testid="SearchBox_Search_Input"]')))
-    search_method.send_keys('crypto')
+    search_method.send_keys('$tip @tipcoineth')
     search_method.send_keys(Keys.RETURN)
 
 
-    latest = wait.until(EC.element_to_be_clickable((By.LINK_TEXT, 'Latest')))
+    # latest = wait.until(EC.element_to_be_clickable((By.LINK_TEXT, 'Latest')))
 
-    latest.click()
+    # latest.click()
 
     # Set to keep track of collected tweets' content and handle
     collected_tweets = set()
