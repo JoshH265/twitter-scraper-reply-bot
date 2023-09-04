@@ -50,11 +50,9 @@ def tweet_data(twitter_username, twitter_password):
     #Finds password field and inputs password
     password = wait.until(EC.presence_of_element_located((By.NAME, 'password')))
     password.send_keys(twitter_password)
-
-
-    
     password.send_keys(Keys.RETURN) #Presses enter key - logins into account
-            
+
+        
     #Finds search box on twitter & inputs texts, then returns
     search_method = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '[data-testid="SearchBox_Search_Input"]')))
     # search_method.send_keys('-filter:replies $tip @tipcoineth')
@@ -63,7 +61,6 @@ def tweet_data(twitter_username, twitter_password):
 
     # USE THIS TO NAVIGATE TO THE LATEST TAB
     # latest = wait.until(EC.element_to_be_clickable((By.LINK_TEXT, 'Latest')))
-
     # latest.click()
 
     # Set to keep track of collected tweets' content and handle
@@ -82,11 +79,12 @@ def tweet_data(twitter_username, twitter_password):
         for tweet in tweets:
             # Extract tweet text and twitter handle
             try:
-                # Check if the tweet is an ad
+                # Check if the tweet is an ad and if it is, skip over it
                 ad_element = tweet.find_elements(By.XPATH, './/span[text()="Ad"]')
                 if ad_element:
                     continue
-
+                
+                # Generate the url for each tweet collected and store within the databse
                 a = tweet.find_element(By.XPATH, './/a[contains(@href, "/status/")]')
                 href = a.get_attribute('href')
                 tweet_text = tweet.find_element(By.XPATH, './/div[@lang]').text
@@ -106,19 +104,16 @@ def tweet_data(twitter_username, twitter_password):
                 print("Content:", tweet_text)
                 print("URL:", tweet_url)
                 print("--------------------")
-                # Add the tweet data to the collected tweets set
-                collected_tweets.add(tweet_data)
+
+                collected_tweets.add(tweet_data) # Add the tweet data to the collected tweets set
 
                 # Insert the tweet into the database
                 cursor.execute('INSERT INTO tweets (handle, content, url) VALUES (?, ?, ?)', (twitter_handle, tweet_text, tweet_url))
                 conn.commit()
 
-                #NEW CODE SECTION, AUTO COMMENTS ON TWEETS
-
                 # Click on the tweet to open it in a new page
                 tweet_url = f'https://twitter.com/{twitter_handle}/status/{tweet_id}'
                 driver.execute_script(f'window.open("{tweet_url}", "_blank");')      
-
                 driver.switch_to.window(driver.window_handles[1])
                 
                 # Wait for the comment box to be visible
@@ -147,46 +142,24 @@ def tweet_data(twitter_username, twitter_password):
                 button.click()     
                 time.sleep(3)
 
-                # send_now_button = driver.find_element(By.CSS_SELECTOR, 'div[role="button"] > div > span > span')
-                # send_now_button.click()
-                # time.sleep(2)
-
                 driver.close()
                 # Switch back to the main window
                 driver.switch_to.window(driver.window_handles[0])
-                print("Navigated back")     
-
-
-
-                # driver.execute_script("arguments[0].scrollIntoView();", reply_button)
-                # driver.execute_script("arguments[0].click();", reply_button)
-
-                # Navigate back to the search results page
-
+                print("Navigated back")    
                 time.sleep(3)
                 
                 new_tweets = True
         
-        # Scroll down
-        # driver.execute_script('window.scrollTo(0, document.body.scrollHeight)')
-        print("About to scroll down")
-
+        # print("About to scroll down") debugging scroll
         body = driver.find_element(By.TAG_NAME, 'body')
         for _ in range(50):
             body.send_keys(Keys.ARROW_DOWN)
             time.sleep(0.1)
 
-        # Wait for some time to allow tweets to load
-        time.sleep(3)
-
-        
-        # If there were no new tweets in the current batch, stop
+        time.sleep(3) #Give time for tweets to load (avoids crashing)
+        # If there were no new tweets in the current batch, refresh page
         if not new_tweets:
             driver.refresh()
-
-    # # Return the collected tweets
-    # return list(collected_tweets)
-
 
 #Runs function to collect login information
 username, password = user_details()
@@ -207,6 +180,5 @@ finally:
     cursor.close()
     conn.close()
 
-input("Press enter to close the browser") #NOT IN USE CURRENTLY
-# Close the WebDriver
-driver.quit()
+input("Press enter to close the browser")
+driver.quit() # Close the WebDriver

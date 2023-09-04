@@ -25,32 +25,33 @@ cursor.execute('''
 ''')
 conn.commit()
 
-# Creates an instance of Chrome
-driver = webdriver.Chrome()
 
-# Open Twitter's login page
-driver.get("https://twitter.com/login")
 
-def tweet_data():
+def user_details():
+    twitter_username = input("Please type twitter username >> ")
+    twitter_password = input("Please type password >> ")
+    return twitter_username, twitter_password
+
+def tweet_data(twitter_username, twitter_password):
 
     wait = WebDriverWait(driver, 10)  # Creates a maximum wait time of 10 seconds for each field
 
     #Finds username field and inputs username then returns
     username = wait.until(EC.presence_of_element_located((By.NAME, 'text')))
-    username.send_keys('')
+    username.send_keys(twitter_username)
 
     username.send_keys(Keys.RETURN) #Presses enter key
 
-    #Finds password field and inputs password then returns
+    #Finds password field and inputs password
     password = wait.until(EC.presence_of_element_located((By.NAME, 'password')))
-    password.send_keys('')
+    password.send_keys(twitter_password)
+
     password.send_keys(Keys.RETURN) #Presses enter key - logins into account
             
     #Finds search box on twitter & inputs texts, then returns
     search_method = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '[data-testid="SearchBox_Search_Input"]')))
     search_method.send_keys('$tip @tipcoineth')
     search_method.send_keys(Keys.RETURN)
-
 
     # latest = wait.until(EC.element_to_be_clickable((By.LINK_TEXT, 'Latest')))
 
@@ -114,8 +115,14 @@ def tweet_data():
         if not new_tweets:
             driver.refresh()
 
-    # # Return the collected tweets
-    # return list(collected_tweets)
+
+
+username, password = user_details()
+
+# Creates an instance of Chrome
+driver = webdriver.Chrome()
+# Open Twitter's login page
+driver.get("https://twitter.com/login")
 
 # Call the function & if there is an error this ensures the databases closes correctly
 try:
@@ -124,6 +131,5 @@ finally:
     cursor.close()
     conn.close()
 
-input("Press enter to close the browser") #NOT IN USE CURRENTLY
-# Close the WebDriver
-driver.quit()
+input("Press enter to close the browser")
+driver.quit() # Close the WebDriver
