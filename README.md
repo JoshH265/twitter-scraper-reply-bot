@@ -1,4 +1,4 @@
-# web-scraper
+# Twitter Scraper/Reply bot
 
 Josh's Basic Twitter Scraper.
 
