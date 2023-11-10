@@ -8,3 +8,5 @@ This will search the latest tab for all tweets with "crypto" in it. this include
 Current plan is upgrade search function/figure out a way to make it more efficient and allow more specific searches.
 
 Then look into creating other features such as tracking followers for specific profiles
+
+Need to install selenium for it to run
