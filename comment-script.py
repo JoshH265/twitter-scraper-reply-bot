@@ -36,9 +36,7 @@ def user_details():
 
 def tweet_data(twitter_username, twitter_password):
 
-    text_selection = ["Reply Guy for $tip @tipcoineth", "Collecting $tip @tipcoineth", "I want to be top of $tip @tipcoineth", "Why do we want the $tip @tipcoineth",
-                        "Give $tip @tipcoineth now", "More $tip @tipcoineth please", "Constantly stacking $tip @tipcoineth", "Not fading the $tip @tipcoineth", "Will cook the $tip @tipcoineth",
-                        "$tip @tipcoineth", "$tip @tipcoineth increasing the engagement quite alot", "$tip @tipcoineth is a pretty interesting concept overall"]
+    text_selection = ["test 1", "test 2"]
     wait = WebDriverWait(driver, 10)  # Creates a maximum wait time of 10 seconds for each field
 
     #Finds username field and inputs username
@@ -56,7 +54,7 @@ def tweet_data(twitter_username, twitter_password):
     #Finds search box on twitter & inputs texts, then returns
     search_method = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '[data-testid="SearchBox_Search_Input"]')))
     # search_method.send_keys('-filter:replies $tip @tipcoineth')
-    search_method.send_keys('$tip @tipcoineth')
+    search_method.send_keys('$bitcoin')
     search_method.send_keys(Keys.RETURN)
 
     # USE THIS TO NAVIGATE TO THE LATEST TAB
