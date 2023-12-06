@@ -10,3 +10,5 @@ Current plan is upgrade search function/figure out a way to make it more efficie
 Then look into creating other features such as tracking followers for specific profiles
 
 Need to install selenium for it to run
+
+Do not advise using currently unless you know how to debug
